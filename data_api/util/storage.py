@@ -5,7 +5,6 @@ from db.models import engine
 
 
 class Session(_Session):
-
     def commit(self):
         """Override the commit method to rollback on error."""
         try:

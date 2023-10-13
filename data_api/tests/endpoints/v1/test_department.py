@@ -137,7 +137,9 @@ class TestJob:
         assert response.status_code == 500
 
     def test_bulk_insert(self, client):
-        departments = {"departments": [{"department": f"department {i}"} for i in range(1000)]}
+        departments = {
+            "departments": [{"department": f"department {i}"} for i in range(1000)]
+        }
 
         # Send request to the endpoint
         response = client.post("/v1/department/bulk", json=departments)

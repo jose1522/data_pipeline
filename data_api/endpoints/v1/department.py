@@ -25,7 +25,9 @@ async def get_job(department_id: int, session=Depends(get_session)):
 
 
 @router.patch("/{department_id}", response_model=Department)
-async def update_job(department_id: int, job: DepartmentBase, session=Depends(get_session)):
+async def update_job(
+    department_id: int, job: DepartmentBase, session=Depends(get_session)
+):
     storage = DepartmentStorage(session=session)
     db_obj = storage.update(department_id, job.dict())
     session.commit()
