@@ -15,10 +15,10 @@ services:
       - data_db
 
   data_db:
-    image: cockroachdb/cockroach:v23.1.11
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "26257:26257"
-      - "8080:8080"
-    volumes:
-      - "./data:/cockroach/cockroach-data"
-    command: start-single-node --insecure
+      - "5432:5432"
