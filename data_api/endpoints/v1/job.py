@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, Header
 
 from db.models import Job
-from db.models.job import JobBase
+from db.models.job import JobBase, JobsListInsert
 from db.storage.job import JobStorage
 from util.storage import get_session
 
@@ -42,3 +42,11 @@ async def delete_job(
     storage = JobStorage(session=session)
     storage.delete(job_id, soft_delete=x_soft_delete)
     session.commit()
+
+
+@router.post("/bulk", status_code=201)
+async def bulk_insert(jobs: JobsListInsert, session=Depends(get_session)):
+    storage = JobStorage(session=session)
+    storage.bulk_upsert([job.dict() for job in jobs.jobs])
+    session.commit()
+

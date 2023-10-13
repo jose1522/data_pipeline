@@ -22,7 +22,3 @@ class BaseModel(SQLModel):
         for key, value in data.items():
             setattr(self, key, value)
         self.updated_at = datetime.utcnow()
-
-
-class BaseDelete(BaseModel):
-    id: int

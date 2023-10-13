@@ -1,5 +1,6 @@
 from typing import Optional, List, Type, Union
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session
 
 from db.models.base import BaseModel
@@ -36,7 +37,7 @@ class BaseStorage:
         """
         try:
             self.session.add(model)
-        except Exception as e:
+        except SQLAlchemyError as e:
             raise DatabaseError(str(e))
         return model
 
@@ -134,3 +135,13 @@ class BaseStorage:
             .scalar()
             is not None
         )
+
+    def bulk_upsert(self, data: list):
+        """Bulk upsert records into the table.
+        Args:
+            data (list): List of dictionaries of data to upsert.
+        """
+        try:
+            self.session.bulk_insert_mappings(self.model, data)
+        except SQLAlchemyError as e:
+            raise DatabaseError(f"Database error: {str(e)}") from e

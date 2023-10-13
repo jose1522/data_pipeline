@@ -1,3 +1,4 @@
+from pydantic import conlist
 from sqlmodel import Field, SQLModel
 
 from db.models.base import BaseModel
@@ -11,3 +12,7 @@ class JobBase(SQLModel):
 
 class Job(JobBase, BaseModel, table=True):
     """Represents a department in the company."""
+
+
+class JobsListInsert(BaseModel):
+    jobs: conlist(JobBase, min_items=1, max_items=1000)
