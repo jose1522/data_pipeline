@@ -49,4 +49,3 @@ async def bulk_insert(jobs: JobsListInsert, session=Depends(get_session)):
     storage = JobStorage(session=session)
     storage.bulk_upsert([job.dict() for job in jobs.jobs])
     session.commit()
-

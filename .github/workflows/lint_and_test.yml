@@ -1,0 +1,44 @@
+name: Lint and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory: ['data_api']
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Append workspace to PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:${{ github.workspace }}" >> $GITHUB_ENV
+
+    - name: Install dependencies with pipenv
+      run: |
+        cd ${{ matrix.working-directory }}
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pipenv install --dev
+
+    - name: Run linter using pipenv
+      run: |
+        cd ${{ matrix.working-directory }}
+        pipenv run flake8 . --exclude=__pycache__ --ignore=E501
+
+    - name: Run tests using pipenv
+      run: |
+        cd ${{ matrix.working-directory }}
+        pipenv run pytest tests/
