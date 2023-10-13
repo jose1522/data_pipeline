@@ -11,3 +11,8 @@ class DepartmentBase(SQLModel):
 
 class Department(DepartmentBase, BaseModel, table=True):
     """Represents a department in the company."""
+
+
+class DepartmentListInsert(SQLModel):
+    """Represents a list of departments to insert."""
+    departments: list[DepartmentBase]
