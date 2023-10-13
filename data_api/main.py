@@ -1,13 +1,15 @@
 from fastapi import FastAPI
 
-from db.models import engine
 from db.migrate import run_migrations
+from db.models import engine
 from endpoints import v1
+from util.middleware import ExceptionMiddleware
 
 
 def create_app() -> FastAPI:
     """Create a FastAPI application."""
     api = FastAPI(debug=True, title="Data API", version="1.0.0")
+    api.add_middleware(ExceptionMiddleware)
     api.include_router(v1.router)
     return api
 

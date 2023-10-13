@@ -3,6 +3,7 @@ from typing import Optional, List, Type, Union
 from sqlmodel import Session
 
 from db.models.base import BaseModel
+from util.exceptions import RecordNotFound, RecordNotActive, DatabaseError
 from util.storage import get_session
 
 
@@ -20,16 +21,24 @@ class BaseStorage:
             Union[ModelType, None]: The record if it exists, else None.
         """
         db_obj = self.session.get(self.model, id)
-        if is_active_only and db_obj and not db_obj.is_active:
-            return None
+        if not db_obj:
+            raise RecordNotFound(id)
+        if is_active_only and not db_obj.is_active:
+            raise RecordNotActive(id)
         return db_obj
 
-    def create(self, model: BaseModel) -> None:
+    def create(self, model: BaseModel) -> BaseModel:
         """Create a record in the table.
         Args:
             model (BaseModel): The model to create.
+        Returns:
+            BaseModel: The created model.
         """
-        self.session.add(model)
+        try:
+            self.session.add(model)
+        except Exception as e:
+            raise DatabaseError(str(e))
+        return model
 
     def update(self, id: int, data: dict) -> BaseModel:
         """Update a record in the table.
@@ -38,9 +47,11 @@ class BaseStorage:
             data (dict): Dictionary of the data to update.
         """
         db_object = self.read(id)
-        if db_object:
-            db_object.update(data)
-        self.session.add(db_object)
+        db_object.update(data)
+        try:
+            self.session.add(db_object)
+        except Exception as e:
+            raise DatabaseError(str(e))
         return db_object
 
     def upsert(self, data: dict) -> BaseModel:
@@ -49,7 +60,7 @@ class BaseStorage:
             db_object.is_active = True
             self.session.add(db_object)
         else:
-            self.create(self.model(**data))
+            db_object = self.create(self.model(**data))
         return db_object
 
     def delete(self, id: int, soft_delete: bool = True) -> None:

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 
 from db.models import Job
 from db.models.job import JobBase
@@ -20,19 +20,13 @@ async def create_job(job: JobBase, session=Depends(get_session)):
 @router.get("/{job_id}", response_model=Job)
 async def get_job(job_id: int, session=Depends(get_session)):
     storage = JobStorage(session=session)
-    db_obj = storage.read(job_id, is_active_only=False)
-    if db_obj:
-        if db_obj.is_active:
-            return db_obj
-        raise HTTPException(status_code=204)
-    raise HTTPException(status_code=404, detail="Job not found")
+    db_obj = storage.read(job_id)
+    return db_obj
 
 
 @router.patch("/{job_id}", response_model=Job)
 async def update_job(job_id: int, job: JobBase, session=Depends(get_session)):
     storage = JobStorage(session=session)
-    if not storage.exists(job_id):
-        raise HTTPException(status_code=404, detail="Job not found")
     db_obj = storage.update(job_id, job.dict())
     session.commit()
     session.refresh(db_obj)
@@ -40,7 +34,11 @@ async def update_job(job_id: int, job: JobBase, session=Depends(get_session)):
 
 
 @router.delete("/{job_id}", status_code=204)
-async def delete_job(job_id: int, soft_delete: bool = True, session=Depends(get_session)):
+async def delete_job(
+    job_id: int,
+    x_soft_delete: bool = Header(default=True),
+    session=Depends(get_session),
+):
     storage = JobStorage(session=session)
-    storage.delete(job_id, soft_delete=soft_delete)
+    storage.delete(job_id, soft_delete=x_soft_delete)
     session.commit()
