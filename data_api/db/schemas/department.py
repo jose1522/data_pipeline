@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel as PydanticBase, constr
 
@@ -10,7 +9,7 @@ class DepartmentInsert(PydanticBase):
     department: constr(min_length=1, max_length=255)
 
 
-class Department(PydanticBase):
+class DepartmentResponse(PydanticBase):
     id: int
     department: str
     created_at: datetime
@@ -18,9 +17,3 @@ class Department(PydanticBase):
 
     class Config:
         orm_mode = True
-
-
-class DepartmentListInsert(PydanticBase):
-    """Represents a list of departments to insert."""
-
-    departments: List[DepartmentInsert]

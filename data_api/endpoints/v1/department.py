@@ -3,7 +3,10 @@ from typing import List
 from fastapi import APIRouter, Header
 from sqlalchemy.exc import IntegrityError
 
-from db.schemas.department import DepartmentInsert, DepartmentListInsert, Department
+from db.schemas.department import (
+    DepartmentInsert,
+    DepartmentResponse,
+)
 from db.storage.department import DepartmentStorage
 from util.exceptions import RecordAlreadyExists
 from util.storage import get_session
@@ -11,7 +14,7 @@ from util.storage import get_session
 router = APIRouter(prefix="/department", tags=["department"])
 
 
-@router.post("/", response_model=Department, status_code=201)
+@router.post("/", response_model=DepartmentResponse, status_code=201)
 async def create_job(department: DepartmentInsert):
     session = get_session()
     storage = DepartmentStorage(session=session)
@@ -21,7 +24,7 @@ async def create_job(department: DepartmentInsert):
     return department
 
 
-@router.get("/{department_id}", response_model=Department)
+@router.get("/{department_id}", response_model=DepartmentResponse)
 async def get_job(department_id: int):
     session = get_session()
     storage = DepartmentStorage(session=session)
@@ -29,7 +32,7 @@ async def get_job(department_id: int):
     return db_obj
 
 
-@router.get("/", response_model=List[Department])
+@router.get("/", response_model=List[DepartmentResponse])
 async def get_jobs(limit: int = 10, offset: int = 0):
     session = get_session()
     storage = DepartmentStorage(session=session)
@@ -37,7 +40,7 @@ async def get_jobs(limit: int = 10, offset: int = 0):
     return db_obj
 
 
-@router.patch("/{department_id}", response_model=Department)
+@router.patch("/{department_id}", response_model=DepartmentResponse)
 async def update_job(department_id: int, job: DepartmentInsert):
     session = get_session()
     storage = DepartmentStorage(session=session)
@@ -62,8 +65,8 @@ async def delete_job(
 
 
 @router.post("/bulk", status_code=201)
-async def bulk_insert(departments: DepartmentListInsert):
+async def bulk_insert(departments: List[DepartmentInsert]):
     session = get_session()
     storage = DepartmentStorage(session=session)
-    storage.bulk_upsert([department.dict() for department in departments.departments])
+    storage.bulk_upsert([department.dict() for department in departments])
     session.commit()

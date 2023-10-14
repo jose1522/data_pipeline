@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel as PydanticBase, constr
 
-from db.schemas.department import Department
+from db.schemas.department import DepartmentResponse
 from db.schemas.job import JobResponse
 
 
@@ -21,7 +21,7 @@ class UserResponse(PydanticBase):
     name: str
     datetime: datetime
     job: Optional[JobResponse]
-    department: Optional[Department]
+    department: Optional[DepartmentResponse]
     created_at: datetime
     updated_at: datetime
 
