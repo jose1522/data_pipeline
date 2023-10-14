@@ -11,6 +11,7 @@ from util.exceptions import (
     RecordAlreadyExists,
     RecordNotActive,
     DatabaseError,
+    BadForeignKey,
 )
 from util.logger import get_logger
 
@@ -43,6 +44,10 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             return JSONResponse(status_code=500, content=content)
         except IntegrityError as exc:
             content = {"detail": str(exc)}
+            self.logger.error(f"Error Response: {content}")
+            return JSONResponse(status_code=400, content=content)
+        except BadForeignKey as exc:
+            content = {"detail": str(exc), "fk_id": exc.fk_id, "fk_name": exc.fk_name}
             self.logger.error(f"Error Response: {content}")
             return JSONResponse(status_code=400, content=content)
         except Exception as exc:

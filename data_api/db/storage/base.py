@@ -150,5 +150,7 @@ class BaseStorage:
         """
         try:
             self.session.bulk_insert_mappings(self.model, data)
+        except IntegrityError:
+            raise
         except SQLAlchemyError as e:
             raise DatabaseError(f"Database error: {str(e)}", data=data) from e

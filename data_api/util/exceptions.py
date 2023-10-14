@@ -32,6 +32,14 @@ class RecordNotActive(Exception):
         super().__init__(self.message)
 
 
+class BadForeignKey(Exception):
+    def __init__(self, fk_id: str, fk_name: str):
+        self.fk_id = fk_id
+        self.fk_name = fk_name
+        self.message = f"Foreign key {fk_name} with id {fk_id} does not exist"
+        super().__init__(self.message)
+
+
 class DatabaseError(Exception):
     def __init__(self, message: str, data: Optional[Union[dict, list]] = None):
         self.data = json.dumps(data)
