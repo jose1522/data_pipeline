@@ -1,25 +1,31 @@
-from typing import Optional
-
-from sqlalchemy import UniqueConstraint
-from sqlmodel import Field, SQLModel
+from sqlalchemy import (
+    Column,
+    String,
+    Integer,
+    ForeignKey,
+    UniqueConstraint,
+    DateTime,
+)
+from sqlalchemy.orm import relationship
 
 from db.models.base import BaseModel
-from db.models.department import Department
-from db.models.job import Job
 
 
-class BaseUser(SQLModel):
-    """Base model for a user. This is the model that is used for validation."""
-
-    name: str = Field(nullable=False, min_length=1, max_length=255)
-    datetime: Optional[str] = Field(
-        nullable=True, max_length=255, regex=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
+class User(BaseModel):
+    __tablename__ = "user"
+    name = Column(String(255), nullable=False, index=True)
+    datetime = Column(DateTime)
+    job_id = Column(Integer, ForeignKey("job.id"), nullable=False)
+    department_id = Column(Integer, ForeignKey("department.id"), nullable=False)
+    job = relationship(
+        "Job",
+        back_populates="users",
+        primaryjoin="and_(Job.id==User.job_id, Job.is_active==True)",
     )
-    job_id: Optional[int] = Field(default=None, foreign_key=Job.id)
-    department_id: Optional[int] = Field(default=None, foreign_key=Department.id)
+    department = relationship(
+        "Department",
+        back_populates="users",
+        primaryjoin="and_(Department.id==User.department_id, Department.is_active==True)",
+    )
 
-
-class User(BaseUser, BaseModel, table=True):
-    # Add a unique constraint to the table to prevent duplicate entries.
-    # The combination of name, job_id, and department_id must be unique.
     __table_args__ = (UniqueConstraint("name", "job_id", "department_id"),)

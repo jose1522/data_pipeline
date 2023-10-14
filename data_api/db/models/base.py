@@ -1,18 +1,20 @@
 from datetime import datetime
-from typing import Optional
 
-from sqlalchemy import BigInteger
-from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, DateTime, Boolean, BigInteger
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
-class BaseModel(SQLModel):
-    id: Optional[int] = Field(
-        primary_key=True, index=True, default=None, sa_column=BigInteger
+class BaseModel(Base):
+    __abstract__ = True
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    updated_at = Column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=True
     )
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    deleted_at: Optional[datetime] = Field(default=None, nullable=True, exclude=True)
-    is_active: Optional[bool] = Field(default=True, index=True, exclude=True)
+    deleted_at = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True, index=True, nullable=True)
 
     def soft_delete(self):
         self.is_active = False
@@ -21,4 +23,3 @@ class BaseModel(SQLModel):
     def update(self, data: dict):
         for key, value in data.items():
             setattr(self, key, value)
-        self.updated_at = datetime.utcnow()

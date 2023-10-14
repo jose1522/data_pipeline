@@ -1,10 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Header
 from sqlalchemy.exc import IntegrityError
 
-from db.models import Department
-from db.models.department import DepartmentBase, DepartmentListInsert
+from db.schemas.department import DepartmentInsert, DepartmentListInsert, Department
 from db.storage.department import DepartmentStorage
 from util.exceptions import RecordAlreadyExists
 from util.storage import get_session
@@ -13,7 +12,8 @@ router = APIRouter(prefix="/department", tags=["department"])
 
 
 @router.post("/", response_model=Department, status_code=201)
-async def create_job(department: DepartmentBase, session=Depends(get_session)):
+async def create_job(department: DepartmentInsert):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     department = storage.upsert(department.dict())
     session.commit()
@@ -22,23 +22,24 @@ async def create_job(department: DepartmentBase, session=Depends(get_session)):
 
 
 @router.get("/{department_id}", response_model=Department)
-async def get_job(department_id: int, session=Depends(get_session)):
+async def get_job(department_id: int):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     db_obj = storage.read(department_id)
     return db_obj
 
 
 @router.get("/", response_model=List[Department])
-async def get_jobs(session=Depends(get_session), limit: int = 10, offset: int = 0):
+async def get_jobs(limit: int = 10, offset: int = 0):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     db_obj = storage.all(limit=limit, skip=offset)
     return db_obj
 
 
 @router.patch("/{department_id}", response_model=Department)
-async def update_job(
-    department_id: int, job: DepartmentBase, session=Depends(get_session)
-):
+async def update_job(department_id: int, job: DepartmentInsert):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     db_obj = storage.update(department_id, job.dict())
     try:
@@ -53,15 +54,16 @@ async def update_job(
 async def delete_job(
     department_id: int,
     x_soft_delete: bool = Header(default=True),
-    session=Depends(get_session),
 ):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     storage.delete(department_id, soft_delete=x_soft_delete)
     session.commit()
 
 
 @router.post("/bulk", status_code=201)
-async def bulk_insert(departments: DepartmentListInsert, session=Depends(get_session)):
+async def bulk_insert(departments: DepartmentListInsert):
+    session = get_session()
     storage = DepartmentStorage(session=session)
     storage.bulk_upsert([department.dict() for department in departments.departments])
     session.commit()

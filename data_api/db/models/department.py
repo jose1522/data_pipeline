@@ -1,19 +1,10 @@
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 from db.models.base import BaseModel
 
 
-class DepartmentBase(SQLModel):
-    """Base model for a department. This is the model that is used for validation."""
-
-    department: str = Field(nullable=False, unique=True, min_length=1, max_length=255)
-
-
-class Department(DepartmentBase, BaseModel, table=True):
-    """Represents a department in the company."""
-
-
-class DepartmentListInsert(SQLModel):
-    """Represents a list of departments to insert."""
-
-    departments: list[DepartmentBase]
+class Department(BaseModel):
+    __tablename__ = "department"
+    department = Column(String(255), nullable=False, unique=True, index=True)
+    users = relationship("User", back_populates="department")

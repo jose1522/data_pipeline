@@ -1,6 +1,7 @@
 import time
 from typing import Callable
 
+from sqlalchemy.exc import IntegrityError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -40,6 +41,10 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             content = {"detail": str(exc), "data": exc.data}
             self.logger.error(f"Error Response: {content}")
             return JSONResponse(status_code=500, content=content)
+        except IntegrityError as exc:
+            content = {"detail": str(exc)}
+            self.logger.error(f"Error Response: {content}")
+            return JSONResponse(status_code=400, content=content)
         except Exception as exc:
             content = {"detail": str(exc)}
             self.logger.error(f"Error Response: {content}. Error type: {type(exc)}")

@@ -4,7 +4,7 @@ from db.models import Department
 from db.storage.department import DepartmentStorage
 
 
-class TestJob:
+class TestDepartment:
     def test_post_job(self, client):
         payload = {
             "department": "Software Engineer",

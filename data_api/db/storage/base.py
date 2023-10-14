@@ -1,7 +1,7 @@
 from typing import Optional, List, Type, Union
 
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from db.models.base import BaseModel
 from util.exceptions import (
