@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 apache-airflow = {extras = ["aiobotocore", "apache.kafka", "apache.spark", "celery", "hashicorp", "postgres"], version = "*"}
 pandas = {extras = ["numpy", "pyarrow"], version = "*"}
+psycopg2-binary = "*"
 
 [dev-packages]
 black = "*"

@@ -1,5 +1,3 @@
 #!/bin/bash
 
-# Initialize the database
-airflow db migrate
-airflow scheduler
+airflow celery worker

@@ -52,7 +52,7 @@ services:
     build:
       context: .
       dockerfile: airflow.Dockerfile
-    command: airflow celery worker
+    entrypoint: /airflow/worker-entrypoint.sh
     environment:
       - AIRFLOW_HOME=/airflow
     depends_on:
