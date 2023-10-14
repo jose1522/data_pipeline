@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from db.migrate import run_migrations
 from db.models import engine
 from endpoints import v1
+from util.exceptions import override_default_handlers
 from util.logger import get_logger
 from util.middleware import ExceptionMiddleware, LoggingMiddleware
 
@@ -13,6 +14,7 @@ def create_app() -> FastAPI:
     api.add_middleware(ExceptionMiddleware)
     api.add_middleware(LoggingMiddleware)
     api.include_router(v1.router)
+    override_default_handlers(api)
     return api
 
 

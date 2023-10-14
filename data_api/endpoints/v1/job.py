@@ -1,10 +1,12 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, Header
+from sqlalchemy.exc import IntegrityError
 
 from db.models import Job
 from db.models.job import JobBase, JobsListInsert
 from db.storage.job import JobStorage
+from util.exceptions import RecordAlreadyExists
 from util.storage import get_session
 
 router = APIRouter(prefix="/job", tags=["job"])
@@ -37,7 +39,10 @@ async def get_jobs(session=Depends(get_session), limit: int = 10, offset: int = 
 async def update_job(job_id: int, job: JobBase, session=Depends(get_session)):
     storage = JobStorage(session=session)
     db_obj = storage.update(job_id, job.dict())
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        raise RecordAlreadyExists(data=job.dict())
     session.refresh(db_obj)
     return db_obj
 

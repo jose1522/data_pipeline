@@ -136,7 +136,7 @@ class TestJob:
             "job": "Software Engineer II",
         }
         response = client.patch("/v1/job/1", json=payload)
-        assert response.status_code == 500
+        assert response.status_code == 409
 
     def test_bulk_insert(self, client):
         jobs_data = {"jobs": [{"job": f"Job {i}"} for i in range(1000)]}

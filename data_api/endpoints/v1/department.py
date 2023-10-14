@@ -1,10 +1,12 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, Header
+from sqlalchemy.exc import IntegrityError
 
 from db.models import Department
 from db.models.department import DepartmentBase, DepartmentListInsert
 from db.storage.department import DepartmentStorage
+from util.exceptions import RecordAlreadyExists
 from util.storage import get_session
 
 router = APIRouter(prefix="/department", tags=["department"])
@@ -39,7 +41,10 @@ async def update_job(
 ):
     storage = DepartmentStorage(session=session)
     db_obj = storage.update(department_id, job.dict())
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        raise RecordAlreadyExists(data=job.dict())
     session.refresh(db_obj)
     return db_obj
 

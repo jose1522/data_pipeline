@@ -2,7 +2,6 @@ import pytest
 
 from db.models import Department
 from db.storage.department import DepartmentStorage
-from db.storage.job import JobStorage
 
 
 class TestJob:
@@ -137,7 +136,7 @@ class TestJob:
             "department": "Software Engineer II",
         }
         response = client.patch("/v1/department/1", json=payload)
-        assert response.status_code == 500
+        assert response.status_code == 409
 
     def test_bulk_insert(self, client):
         departments = {
@@ -161,7 +160,9 @@ class TestJob:
 
     @pytest.mark.parametrize("limit", [1, 10, 100, 1000])
     def test_get_all_departments(self, limit, client, session):
-        departments = {"departments": [{"department": f"Department {i}"} for i in range(limit)]}
+        departments = {
+            "departments": [{"department": f"Department {i}"} for i in range(limit)]
+        }
         storage = DepartmentStorage(session=session)
         storage.bulk_upsert(departments["departments"])
         session.commit()
@@ -185,7 +186,7 @@ class TestJob:
 
     def test_get_all_soft_deleted(self, client, session):
         department = Department(department="Department")
-        storage = JobStorage(session=session)
+        storage = DepartmentStorage(session=session)
         storage.create(department)
         session.commit()
         storage.delete(1)

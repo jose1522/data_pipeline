@@ -1,10 +1,15 @@
 from typing import Optional, List, Type, Union
 
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlmodel import Session
 
 from db.models.base import BaseModel
-from util.exceptions import RecordNotFound, RecordNotActive, DatabaseError
+from util.exceptions import (
+    RecordNotFound,
+    RecordNotActive,
+    DatabaseError,
+    RecordAlreadyExists,
+)
 from util.storage import get_session
 
 
@@ -38,7 +43,7 @@ class BaseStorage:
         try:
             self.session.add(model)
         except SQLAlchemyError as e:
-            raise DatabaseError(str(e))
+            raise DatabaseError(str(e), data=model.dict())
         return model
 
     def update(self, id: int, data: dict) -> BaseModel:
@@ -48,11 +53,13 @@ class BaseStorage:
             data (dict): Dictionary of the data to update.
         """
         db_object = self.read(id)
-        db_object.update(data)
         try:
+            db_object.update(data)
             self.session.add(db_object)
-        except Exception as e:
-            raise DatabaseError(str(e))
+        except SQLAlchemyError as e:
+            raise DatabaseError(str(e), data=data)
+        except IntegrityError as e:
+            raise RecordAlreadyExists(data=data) from e
         return db_object
 
     def upsert(self, data: dict) -> BaseModel:
@@ -144,4 +151,4 @@ class BaseStorage:
         try:
             self.session.bulk_insert_mappings(self.model, data)
         except SQLAlchemyError as e:
-            raise DatabaseError(f"Database error: {str(e)}") from e
+            raise DatabaseError(f"Database error: {str(e)}", data=data) from e
