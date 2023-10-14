@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+apache-airflow = {extras = ["aiobotocore", "apache.kafka", "apache.spark", "celery", "hashicorp", "postgres"], version = "*"}
+pandas = {extras = ["numpy", "pyarrow"], version = "*"}
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+
+[requires]
+python_version = "3.10"

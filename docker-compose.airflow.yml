@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  airflow-backend:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - ./airflow_backend:/var/lib/postgresql/data
+    expose:
+      - '5432'
+
+  airflow:
+    build:
+        context: .
+        dockerfile: airflow.Dockerfile
+    entrypoint: /airflow/airflow-entrypoint.sh
+    environment:
+      - AIRFLOW_HOME=/airflow
+    depends_on:
+      - airflow-backend
+      - airflow-broker
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./airflow/:/airflow
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  airflow-broker:
+    image: redis:latest
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: airflow.Dockerfile
+    environment:
+        - AIRFLOW_HOME=/airflow
+    entrypoint: /airflow/scheduler-entrypoint.sh
+    depends_on:
+      airflow:
+        condition: service_healthy
+    volumes:
+      - ./airflow/:/airflow
+
+  airflow-worker:
+    build:
+      context: .
+      dockerfile: airflow.Dockerfile
+    command: airflow celery worker
+    environment:
+      - AIRFLOW_HOME=/airflow
+    depends_on:
+      - airflow-scheduler
+    volumes:
+      - ./airflow/:/airflow
