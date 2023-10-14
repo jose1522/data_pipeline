@@ -1,3 +1,6 @@
+import time
+from typing import Callable
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -8,6 +11,7 @@ from util.exceptions import (
     RecordNotActive,
     DatabaseError,
 )
+from util.logger import get_logger
 
 
 class ExceptionMiddleware(BaseHTTPMiddleware):
@@ -29,3 +33,23 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
                 status_code=500, content={"detail": f"An error occurred: {str(exc)}"}
             )
         return response
+
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: Callable):
+        super().__init__(app)
+        self.logger = get_logger()
+
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+        try:
+            response = await call_next(request)
+            response_time = time.time() - start
+            self.logger.info(
+                f"Request: {request.method} {request.url} {response.status_code} - {response_time:.2f}s"
+            )
+            return response
+        except Exception as exc:
+            self.logger.exception(
+                f"Request: {request.method} {request.url}. An error occurred: {exc}"
+            )

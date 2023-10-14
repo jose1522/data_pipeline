@@ -3,13 +3,15 @@ from fastapi import FastAPI
 from db.migrate import run_migrations
 from db.models import engine
 from endpoints import v1
-from util.middleware import ExceptionMiddleware
+from util.logger import get_logger
+from util.middleware import ExceptionMiddleware, LoggingMiddleware
 
 
 def create_app() -> FastAPI:
     """Create a FastAPI application."""
     api = FastAPI(debug=True, title="Data API", version="1.0.0")
     api.add_middleware(ExceptionMiddleware)
+    api.add_middleware(LoggingMiddleware)
     api.include_router(v1.router)
     return api
 
@@ -20,7 +22,10 @@ app = create_app()
 @app.on_event("startup")
 def on_startup():
     """Run migrations on startup."""
+    logger = get_logger()
+    logger.info("Running migrations...")
     run_migrations()
+    logger.info("Migrations complete.")
 
 
 @app.on_event("shutdown")

@@ -24,3 +24,5 @@ DB_DSN = config(
 )
 
 DB_ECHO = config("DB_ECHO", cast=bool, default=False)
+LOGGER_HOST = config("LOGGER_HOST", default="localhost")
+LOGGER_PORT = config("LOGGER_PORT", cast=int, default=12201)

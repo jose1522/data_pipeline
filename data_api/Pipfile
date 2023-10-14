@@ -8,6 +8,8 @@ fastapi = {extras = ["all"], version = "*"}
 uvicorn = {extras = ["standard"], version = "*"}
 sqlmodel = {extras = ["all"], version = "*"}
 psycopg2-binary = "*"
+loguru = "*"
+graypy = "*"
 
 [dev-packages]
 black = "*"

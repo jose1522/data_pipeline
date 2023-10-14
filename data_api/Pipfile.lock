@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "65d8d0e0bc15639fe596e7ac8e3f585bafcc93098ea22a6b67c6a86fac441ab0"
+            "sha256": "3c78cbf64aebc73f8a8ed78f46a79347596c5ab077b15ac46d0824d6b0c775e6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -74,6 +74,14 @@
             ],
             "index": "pypi",
             "version": "==0.99.1"
+        },
+        "graypy": {
+            "hashes": [
+                "sha256:5df0102ed52fdaa24dd579bc1e4904480c2c9bbb98917a0b3241ecf510c94207",
+                "sha256:fd8dc4a721de1278576d92db10ac015e99b4e480cf1b18892e79429fd9236e16"
+            ],
+            "index": "pypi",
+            "version": "==2.1.0"
         },
         "h11": {
             "hashes": [
@@ -159,6 +167,14 @@
                 "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"
             ],
             "version": "==3.1.2"
+        },
+        "loguru": {
+            "hashes": [
+                "sha256:003d71e3d3ed35f0f8984898359d65b79e5b21943f78af86aa5491210429b8eb",
+                "sha256:e671a53522515f34fd406340ee968cb9ecafbc4b36c679da03c18fd8d0bd51ac"
+            ],
+            "index": "pypi",
+            "version": "==0.7.2"
         },
         "markupsafe": {
             "hashes": [
