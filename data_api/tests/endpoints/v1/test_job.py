@@ -1,3 +1,5 @@
+import pytest
+
 from db.models import Job
 from db.storage.job import JobStorage
 
@@ -153,3 +155,35 @@ class TestJob:
 
         # Check the response status code and data
         assert response.status_code == 422
+
+    @pytest.mark.parametrize("limit", [1, 10, 100, 1000])
+    def test_get_all_jobs(self, limit, client, session):
+        jobs_data = {"jobs": [{"job": f"Job {i}"} for i in range(limit)]}
+        storage = JobStorage(session=session)
+        storage.bulk_upsert(jobs_data["jobs"])
+        session.commit()
+
+        # Send request to the endpoint
+        response = client.get("/v1/job/")
+
+        # Check the response status code and data
+        assert response.status_code == 200
+        assert len(response.json()) == limit
+        for i in range(limit):
+            assert response.json()[i]["job"] == f"Job {i}"
+
+    def test_get_all_jobs_empty(self, client, session):
+        # Send request to the endpoint
+        response = client.get("/v1/job/")
+
+        # Check the response status code and data
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+    def test_get_all_soft_deleted(self, client, session):
+        job = Job(job="Software Engineer")
+        storage = JobStorage(session=session)
+        storage.create(job)
+        session.commit()
+        storage.delete(1)
+        session.commit()
