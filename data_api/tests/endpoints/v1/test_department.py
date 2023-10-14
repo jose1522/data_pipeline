@@ -1,5 +1,8 @@
+import pytest
+
 from db.models import Department
 from db.storage.department import DepartmentStorage
+from db.storage.job import JobStorage
 
 
 class TestJob:
@@ -155,3 +158,38 @@ class TestJob:
 
         # Check the response status code and data
         assert response.status_code == 422
+
+    @pytest.mark.parametrize("limit", [1, 10, 100, 1000])
+    def test_get_all_departments(self, limit, client, session):
+        departments = {"departments": [{"department": f"Department {i}"} for i in range(limit)]}
+        storage = DepartmentStorage(session=session)
+        storage.bulk_upsert(departments["departments"])
+        session.commit()
+
+        # Send request to the endpoint
+        response = client.get(f"/v1/department/?limit={limit}")
+
+        # Check the response status code and data
+        assert response.status_code == 200
+        assert len(response.json()) == limit
+        for i in range(limit):
+            assert response.json()[i]["department"] == f"Department {i}"
+
+    def test_get_all_departments_empty(self, client, session):
+        # Send request to the endpoint
+        response = client.get("/v1/job/")
+
+        # Check the response status code and data
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+    def test_get_all_soft_deleted(self, client, session):
+        department = Department(department="Department")
+        storage = JobStorage(session=session)
+        storage.create(department)
+        session.commit()
+        storage.delete(1)
+        session.commit()
+        response = client.get("/v1/department/")
+        assert response.status_code == 200
+        assert len(response.json()) == 0

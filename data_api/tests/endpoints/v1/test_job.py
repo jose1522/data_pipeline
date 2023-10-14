@@ -164,7 +164,7 @@ class TestJob:
         session.commit()
 
         # Send request to the endpoint
-        response = client.get("/v1/job/")
+        response = client.get(f"/v1/job/?limit={limit}")
 
         # Check the response status code and data
         assert response.status_code == 200
@@ -187,3 +187,6 @@ class TestJob:
         session.commit()
         storage.delete(1)
         session.commit()
+        response = client.get("/v1/job/")
+        assert response.status_code == 200
+        assert len(response.json()) == 0

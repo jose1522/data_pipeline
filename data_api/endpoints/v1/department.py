@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Header
 
 from db.models import Department
@@ -21,6 +23,13 @@ async def create_job(department: DepartmentBase, session=Depends(get_session)):
 async def get_job(department_id: int, session=Depends(get_session)):
     storage = DepartmentStorage(session=session)
     db_obj = storage.read(department_id)
+    return db_obj
+
+
+@router.get("/", response_model=List[Department])
+async def get_jobs(session=Depends(get_session), limit: int = 10, offset: int = 0):
+    storage = DepartmentStorage(session=session)
+    db_obj = storage.all(limit=limit, skip=offset)
     return db_obj
 
 
