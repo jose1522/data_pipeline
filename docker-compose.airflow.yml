@@ -47,6 +47,14 @@ services:
         condition: service_healthy
     volumes:
       - ./airflow/:/airflow
+    deploy:
+        mode: replicated
+        replicas: 2
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
 
   airflow-worker:
     build:
@@ -58,4 +66,19 @@ services:
     depends_on:
       - airflow-scheduler
     volumes:
-      - ./airflow/:/airflow
+      - ./airflow/worker-entrypoint.sh:/airflow/worker-entrypoint.sh
+      - ./airflow/airflow.cfg:/airflow/airflow.cfg
+      - ./airflow/dags:/airflow/dags
+      - ./airflow/logs:/airflow/logs
+      - shared-data:/tmp
+    deploy:
+        mode: replicated
+        replicas: 1
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+
+volumes:
+    shared-data:

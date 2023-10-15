@@ -44,7 +44,6 @@ def process_chunk(
         nrows=limit - offset,
         header="infer" if use_headers else None,
     )
-    print(chunk_data)
     if column_name_map:
         new_column_name_map = {}
         for key, value in column_name_map.items():
@@ -55,7 +54,6 @@ def process_chunk(
         # rename the columns
         chunk_data = chunk_data.rename(columns=new_column_name_map)
 
-    print(chunk_data)
 
     response = requests.post(endpoint_url, json=chunk_data.to_dict(orient="records"))
     if response.status_code > 200:
