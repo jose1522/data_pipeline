@@ -1,5 +1,4 @@
 import os
-import tempfile
 from datetime import datetime
 
 import fastavro
@@ -40,23 +39,26 @@ dag = DAG(
 
 
 def fetch_from_blob_storage(**kwargs):
-    db_hook = PostgresHook(kwargs["params"]["db_connection_id"])
     hook = S3Hook(aws_conn_id=kwargs["params"]["blob_storage_connection_id"])
 
     output_bucket = kwargs["params"]["input_bucket"]
     output_location = kwargs["params"]["input_location"]
     output_filename = kwargs["params"]["input_filename"]
-    table_name = kwargs["params"]["table_name"]
 
     # Create the key for the object
     key = f"{output_location}/{output_filename}"
 
-    # Create a temporary file to save the fetched Avro data
-    temp_dir = tempfile.TemporaryDirectory()
-
     temp_file_name = hook.download_file(
-        key=key, bucket_name=output_bucket, local_path=temp_dir.name
+        key=key, bucket_name=output_bucket, local_path="/tmp"
     )
+    return temp_file_name
+
+
+def restore_from_backup(**kwargs):
+    task_instance = kwargs["task_instance"]
+    temp_file_name = task_instance.xcom_pull(task_ids="fetch_blob")
+    table_name = kwargs["params"]["table_name"]
+    db_hook = PostgresHook(kwargs["params"]["db_connection_id"])
 
     # Read Avro data
     with open(temp_file_name, "rb") as f:
@@ -64,7 +66,6 @@ def fetch_from_blob_storage(**kwargs):
         records = [r for r in reader]
 
     # Insert into database
-
     try:
         conn = db_hook.get_conn()
         cursor = conn.cursor()
@@ -109,13 +110,28 @@ def upload_log_to_s3(**kwargs):
             os.remove(log_filename)
 
 
-restore_from_backup = PythonOperator(
-    task_id="restore_from_backup",
+def remove_temp_file(**kwargs):
+    # Get the temporary file name from the previous task
+    task_instance = kwargs["task_instance"]
+    temp_file_name = task_instance.xcom_pull(task_ids="fetch_blob")
+
+    if os.path.exists(temp_file_name):
+        os.remove(temp_file_name)
+
+
+fetch_blob_task = PythonOperator(
+    task_id="fetch_blob",
     python_callable=fetch_from_blob_storage,
     provide_context=True,
     dag=dag,
 )
 
+restore_from_backup_task = PythonOperator(
+    task_id="restore_from_backup",
+    python_callable=restore_from_backup,
+    provide_context=True,
+    dag=dag,
+)
 
 upload_log_to_s3_task = PythonOperator(
     task_id="upload_log",
@@ -126,4 +142,17 @@ upload_log_to_s3_task = PythonOperator(
     dag=dag,
 )
 
-restore_from_backup >> upload_log_to_s3_task
+remove_temp_file_task = PythonOperator(
+    task_id="remove_temp_file",
+    python_callable=remove_temp_file,
+    provide_context=True,
+    trigger_rule=TriggerRule.ALL_DONE,
+    dag=dag,
+)
+
+
+(
+    fetch_blob_task
+    >> restore_from_backup_task
+    >> [upload_log_to_s3_task, remove_temp_file_task]
+)
