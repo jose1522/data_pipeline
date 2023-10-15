@@ -15,6 +15,18 @@ class TestDepartment:
         assert actual["department"] == "Software Engineer"
         assert actual["id"] == 1
 
+    def test_post_job_with_id(self, client, session):
+        storage = DepartmentStorage(session=session)
+        payload = {
+            "id": 100,
+            "department": "Software Engineer",
+        }
+        response = client.post("/v1/department", json=payload)
+        actual = response.json()
+        assert response.status_code == 201
+        assert actual["department"] == "Software Engineer"
+        assert storage.exists(100)
+
     def test_get_job(self, client, session):
         department = Department(department="Software Engineer")
         storage = DepartmentStorage(session=session)
@@ -141,11 +153,17 @@ class TestDepartment:
     def test_bulk_insert(self, client):
         departments = [{"department": f"department {i}"} for i in range(1000)]
 
-        # Send request to the endpoint
         response = client.post("/v1/department/bulk", json=departments)
-
-        # Check the response status code and data
         assert response.status_code == 201
+
+    def test_bulk_insert_with_id(self, client, session):
+        storage = DepartmentStorage(session=session)
+        departments = [
+            {"id": i + 10000, "department": f"department {i}"} for i in range(1000)
+        ]
+        response = client.post("/v1/department/bulk", json=departments)
+        assert response.status_code == 201
+        assert storage.exists(10000)
 
     def test_bulk_insert_too_many(self, client):
         jobs_data = {"jobs": [{"department": f"Department {i}"} for i in range(1001)]}
