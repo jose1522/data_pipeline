@@ -14,9 +14,9 @@ RUN apt-get update && \
 
 # Install Pipenv
 USER airflow
-RUN pip install --upgrade pip pipenv
+RUN pip install --upgrade pip
 
-# Install Python dependencies using Pipenv
+# Install Python dependencies
 WORKDIR /airflow
 COPY ./airflow/ /airflow/
-RUN pipenv install --deploy --ignore-pipfile
+RUN pip install -r requirements.txt

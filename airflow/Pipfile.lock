@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cfcc132c6590bf65fcdd4f0659f4160b75a17ba5610f95aa785f76d208e797f4"
+            "sha256": "256153a53d8ed04996089a21bdc487dfafb24935b2023274f3879719d557e0ad"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -245,7 +245,6 @@
                 "sha256:7e65882739bd02a8cef0b3893de1aee308b69c3cdc91331a381234217da4a303",
                 "sha256:e77dbc98e9c06f7b2d6f856d6dd4fc847ba8941b9de27e7b213a0e3ef06ad09a"
             ],
-            "index": "pypi",
             "version": "==5.6.1"
         },
         "apache-airflow-providers-sqlite": {
@@ -1818,7 +1817,7 @@
                 "sha256:f7fc5a5acafb7d6ccca13bfa8c90f8c51f13d8fb87d95656d3950f0158d3ce53",
                 "sha256:f9b5571d33660d5009a8b3c25dc1db560206e2d2f89d3df1cb32d72c0d117d52"
             ],
-            "index": "pypi",
+            "markers": "python_version >= '3.7'",
             "version": "==2.9.9"
         },
         "py4j": {
