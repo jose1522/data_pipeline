@@ -7,6 +7,7 @@ name = "pypi"
 apache-airflow = {extras = ["aiobotocore", "apache.kafka", "apache.spark", "celery", "hashicorp", "postgres"], version = "*"}
 pandas = {extras = ["numpy", "pyarrow"], version = "*"}
 fastavro = "*"
+loguru = "*"
 
 [dev-packages]
 black = "*"
