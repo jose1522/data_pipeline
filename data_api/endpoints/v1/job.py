@@ -1,9 +1,10 @@
 from typing import List
 
 from fastapi import APIRouter, Header
+from pydantic import conlist
 from sqlalchemy.exc import IntegrityError
 
-from db.schemas.job import JobInsert, JobsListInsert, JobResponse
+from db.schemas.job import JobInsert, JobResponse
 from db.storage.job import JobStorage
 from util.exceptions import RecordAlreadyExists
 from util.storage import get_session
@@ -62,8 +63,8 @@ async def delete_job(
 
 
 @router.post("/bulk", status_code=201)
-async def bulk_insert(jobs: JobsListInsert):
+async def bulk_insert(jobs: conlist(JobInsert, min_items=1, max_items=1000)):
     session = get_session()
     storage = JobStorage(session=session)
-    storage.bulk_upsert([job.dict() for job in jobs.jobs])
+    storage.bulk_upsert([job.dict() for job in jobs])
     session.commit()

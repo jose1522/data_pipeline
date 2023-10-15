@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Header
+from pydantic import conlist
 from sqlalchemy.exc import IntegrityError
 
 from db.schemas.department import (
@@ -65,7 +66,9 @@ async def delete_job(
 
 
 @router.post("/bulk", status_code=201)
-async def bulk_insert(departments: List[DepartmentInsert]):
+async def bulk_insert(
+    departments: conlist(DepartmentInsert, min_items=1, max_items=1000)
+):
     session = get_session()
     storage = DepartmentStorage(session=session)
     storage.bulk_upsert([department.dict() for department in departments])

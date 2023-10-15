@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel as PydanticBase, conlist
+from pydantic import BaseModel as PydanticBase
 
 
 class JobInsert(PydanticBase):
@@ -19,7 +19,3 @@ class JobResponse(PydanticBase):
 
     class Config:
         orm_mode = True
-
-
-class JobsListInsert(PydanticBase):
-    jobs: conlist(JobInsert, min_items=1, max_items=1000)

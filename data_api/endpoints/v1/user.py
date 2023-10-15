@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Header
+from pydantic import conlist
 
 from db.schemas.user import UserResponse, UserInsert
 from db.storage.user import UserStorage
@@ -18,7 +19,7 @@ async def create_user(user: UserInsert):
 
 
 @router.post("/bulk", status_code=201)
-async def create_users(users: list[UserInsert]):
+async def create_users(users: conlist(UserInsert, min_items=1, max_items=1000)):
     session = get_session()
     storage = UserStorage(session=session)
     storage.bulk_upsert([user.dict() for user in users])
