@@ -322,3 +322,4 @@ fabric.properties
 data/
 airflow_backend/
 airflow/logs/*
+*.pid
