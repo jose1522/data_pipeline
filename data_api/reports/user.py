@@ -23,7 +23,7 @@ def quarterly_hires(year: int, engine: Optional[Engine] = None) -> pd.DataFrame:
     GROUP BY
         department_name, job_title, EXTRACT(QUARTER FROM datetime)
     ORDER BY
-        department_name, job_title, EXTRACT(QUARTER FROM datetime)  
+        department_name, job_title, EXTRACT(QUARTER FROM datetime)
     """
     engine = engine or default_engine
     data = pd.read_sql_query(query, engine)
