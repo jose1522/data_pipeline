@@ -16,8 +16,5 @@ WORKDIR /data_api
 COPY ./data_api/ /data_api/
 RUN pipenv install --deploy --ignore-pipfile
 
-# Copy the FastAPI app
-COPY ./data_api/ /data_api/
-
 
 CMD ["pipenv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "logging_config.ini"]

@@ -54,7 +54,6 @@ def process_chunk(
         # rename the columns
         chunk_data = chunk_data.rename(columns=new_column_name_map)
 
-
     response = requests.post(endpoint_url, json=chunk_data.to_dict(orient="records"))
     if response.status_code > 200:
         logger.error(f"Failed to upload chunk {offset}-{limit}: {response.text}")

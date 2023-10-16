@@ -1,5 +1,7 @@
 import time
 
+import pandas as pd
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 
 from util.logger import get_logger
@@ -23,3 +25,12 @@ def wait_for_connection(engine):
     else:
         # If the database is not reachable after 30 retries, raise an exception
         raise Exception("Could not connect to the database")
+
+
+def query_to_dataframe(query: str, engine: Engine) -> pd.DataFrame:
+    """Executes a SQL query and returns a dataframe.
+    Args:
+        query: The SQL query to execute.
+        engine: The SQLAlchemy engine to use.
+    """
+    return pd.read_sql_query(query, engine)
