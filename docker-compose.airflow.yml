@@ -22,7 +22,7 @@ services:
       - airflow-backend
       - airflow-broker
     volumes:
-      - ./dags:/opt/airflow/dags
+      - ./airflow/dags:/opt/airflow/dags
       - ./airflow/:/airflow
     ports:
       - "8082:8080"
